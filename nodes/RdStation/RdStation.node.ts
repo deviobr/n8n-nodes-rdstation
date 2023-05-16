@@ -1,15 +1,8 @@
 import { IExecuteFunctions } from 'n8n-core';
 
-import {
-	IDataObject,
-	INodeExecutionData,
-	INodeType,
-	INodeTypeDescription,
-	JsonObject,
-	NodeApiError,
-} from 'n8n-workflow';
+import { IDataObject, INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
 
-import { OptionsWithUri } from 'request';
+import { rdStationApiRequest } from './GenericFunctions';
 
 const eventTypeMap: any = {
 	conversion: 'CONVERSION',
@@ -217,96 +210,95 @@ export class RdStation implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		// Handle data coming from previous nodes
 		const items = this.getInputData();
-		let responseData;
-		const returnData = [];
+		const returnData: INodeExecutionData[] = [];
+
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
 
+		let responseData;
+
 		// For each item, make an API call to create a contact
 		for (let i = 0; i < items.length; i++) {
-			if (['conversion', 'opportunity', 'sale', 'lost'].includes(resource)) {
-				if (operation === 'new') {
-					// Get email input
-					const email = this.getNodeParameter('email', i) as string;
-					// Set the Payload
-					const payload: IDataObject = {
-						email: email,
-					};
-					if (resource === 'conversion') {
-						// Get identifier input
-						const identifier = this.getNodeParameter('identifier', i) as string;
-						payload.conversion_identifier = identifier;
-
-						// Get additional fields input
-						const { customFields } = this.getNodeParameter('additionalFields', i) as {
-							customFields: {
-								customFieldValues: [
-									{
-										fieldId: string;
-										fieldValue: string;
-									},
-								];
-							};
+			try {
+				if (['conversion', 'opportunity', 'sale', 'lost'].includes(resource)) {
+					if (operation === 'new') {
+						// Get email input
+						const email = this.getNodeParameter('email', i) as string;
+						// Set the Payload
+						const payload: IDataObject = {
+							email: email,
 						};
-						if (customFields?.customFieldValues) {
-							const { customFieldValues } = customFields;
-							const data = customFieldValues.reduce(
-								(obj, value) => Object.assign(obj, { [`${value.fieldId}`]: value.fieldValue }),
-								{},
-							);
-							Object.assign(payload, data);
-						}
-					}
-					if (['opportunity', 'sale', 'lost'].includes(resource)) {
-						// Get funnel name input
-						const funnelName = this.getNodeParameter('funnel_name', i) as string;
-						payload.funnel_name = funnelName;
-					}
-					if (['sale'].includes(resource)) {
-						// Get value input
-						const value = this.getNodeParameter('value', i) as number;
-						if (value) {
-							payload.value = value;
-						}
-					}
-					if (['lost'].includes(resource)) {
-						// Get reason input
-						const reason = this.getNodeParameter('reason', i) as string;
-						if (reason) {
-							payload.reason = reason;
-						}
-					}
+						if (resource === 'conversion') {
+							// Get identifier input
+							const identifier = this.getNodeParameter('identifier', i) as string;
+							payload.conversion_identifier = identifier;
 
-					const options: OptionsWithUri = {
-						headers: {
-							Accept: 'application/json',
-						},
-						method: 'POST',
-						body: {
+							// Get additional fields input
+							const { customFields } = this.getNodeParameter('additionalFields', i) as {
+								customFields: {
+									customFieldValues: [
+										{
+											fieldId: string;
+											fieldValue: string;
+										},
+									];
+								};
+							};
+							if (customFields?.customFieldValues) {
+								const { customFieldValues } = customFields;
+								const data = customFieldValues.reduce(
+									(obj, value) => Object.assign(obj, { [`${value.fieldId}`]: value.fieldValue }),
+									{},
+								);
+								Object.assign(payload, data);
+							}
+						} else if (['opportunity', 'sale', 'lost'].includes(resource)) {
+							// Get funnel name input
+							const funnelName = this.getNodeParameter('funnel_name', i) as string;
+							payload.funnel_name = funnelName;
+
+							if (resource === 'sale') {
+								// Get value input
+								const value = this.getNodeParameter('value', i) as number;
+								if (value) {
+									payload.value = value;
+								}
+							} else if (resource === 'lost') {
+								// Get reason input
+								const reason = this.getNodeParameter('reason', i) as string;
+								if (reason) {
+									payload.reason = reason;
+								}
+							}
+						}
+
+						const body: IDataObject = {
 							event_type: eventTypeMap[resource],
 							event_family: 'CDP',
 							payload,
-						},
-						uri: `https://api.rd.services/platform/events`,
-						json: true,
-					};
-					try {
-						responseData = await this.helpers.requestOAuth2.call(
-							this,
-							'rdStationOAuth2Api',
-							options,
-							{
-								tokenType: 'Bearer',
-							},
-						);
-					} catch (error) {
-						throw new NodeApiError(this.getNode(), error as JsonObject);
+						};
+						responseData = await rdStationApiRequest.call(this, 'POST', '/events', body);
 					}
-					returnData.push(responseData);
 				}
+			} catch (error) {
+				if (this.continueOnFail()) {
+					const executionErrorData = {
+						json: {} as IDataObject,
+						error: error.message,
+						itemIndex: i,
+					};
+					returnData.push(executionErrorData as INodeExecutionData);
+					continue;
+				}
+				throw error;
 			}
+			const executionData = this.helpers.constructExecutionMetaData(
+				this.helpers.returnJsonArray(responseData as IDataObject),
+				{ itemData: { item: i } },
+			);
+			returnData.push(...executionData);
 		}
-		// Map data to n8n data structure
-		return [this.helpers.returnJsonArray(returnData)];
+
+		return this.prepareOutputData(returnData);
 	}
 }
