@@ -1,12 +1,6 @@
 import { IExecuteFunctions } from 'n8n-core';
 
-import {
-	IDataObject,
-	INodeExecutionData,
-	INodeType,
-	INodeTypeDescription,
-	NodeOperationError,
-} from 'n8n-workflow';
+import { IDataObject, INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
 
 import { OptionsWithUri } from 'request';
 
@@ -36,11 +30,6 @@ export class RdStation implements INodeType {
 			{
 				name: 'rdStationOAuth2Api',
 				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['oAuth2'],
-					},
-				},
 			},
 		],
 		properties: [
@@ -219,15 +208,6 @@ export class RdStation implements INodeType {
 	};
 	// The execute method will go here
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const credentials = (await this.getCredentials('rdStationOAuth2Api')) as {
-			url: string;
-			accessToken: string;
-		};
-
-		if (credentials === undefined) {
-			throw new NodeOperationError(this.getNode(), 'No credentials got returned!');
-		}
-
 		// Handle data coming from previous nodes
 		const items = this.getInputData();
 		let responseData;
@@ -303,11 +283,7 @@ export class RdStation implements INodeType {
 						uri: `https://api.rd.services/platform/events`,
 						json: true,
 					};
-					responseData = await this.helpers.requestWithAuthentication.call(
-						this,
-						'rdStationOAuth2Api',
-						options,
-					);
+					responseData = await this.helpers.requestOAuth2.call(this, 'rdStationOAuth2Api', options);
 					returnData.push(responseData);
 				}
 			}

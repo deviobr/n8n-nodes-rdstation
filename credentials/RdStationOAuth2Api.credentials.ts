@@ -10,7 +10,7 @@ export class RdStationOAuth2Api implements ICredentialType {
 			displayName: 'Grant Type',
 			name: 'grantType',
 			type: 'hidden',
-			default: 'code',
+			default: 'authorizationCode',
 		},
 		{
 			displayName: 'Authorization URL',

@@ -1,19 +1,19 @@
 {
-	"name": "n8n-nodes-rdstation",
-	"version": "0.1.0",
+	"name": "@deviobr/n8n-nodes-rdstation",
+	"version": "0.1.7",
 	"description": "n8n node to create a new conversion in RD Station Marketing",
 	"keywords": [
 		"n8n-community-node-package"
 	],
 	"license": "MIT",
-	"homepage": "",
+	"homepage": "https://github.com/deviobr/n8n-nodes-rdstation#readme",
 	"author": {
-		"name": "Paulo Rico",
-		"email": "paulo@devio.com.br"
+		"name": "Devio",
+		"email": "hey@devio.com.br"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/deviobr/n8n-nodes-rdstation.git"
+		"url": "git+https://github.com/deviobr/n8n-nodes-rdstation.git"
 	},
 	"main": "index.js",
 	"scripts": {
@@ -30,12 +30,10 @@
 	"n8n": {
 		"n8nNodesApiVersion": 1,
 		"credentials": [
-			"dist/credentials/ExampleCredentialsApi.credentials.js",
-			"dist/credentials/HttpBinApi.credentials.js"
+			"dist/credentials/RdStationOAuth2Api.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/ExampleNode/ExampleNode.node.js",
-			"dist/nodes/HttpBin/HttpBin.node.js"
+			"dist/nodes/RdStation/RdStation.node.js"
 		]
 	},
 	"devDependencies": {
@@ -48,5 +46,8 @@
 		"n8n-workflow": "*",
 		"prettier": "^2.7.1",
 		"typescript": "~4.8.4"
+	},
+	"bugs": {
+		"url": "https://github.com/deviobr/n8n-nodes-rdstation/issues"
 	}
 }
