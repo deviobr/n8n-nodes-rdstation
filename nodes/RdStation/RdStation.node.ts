@@ -1,6 +1,13 @@
 import { IExecuteFunctions } from 'n8n-core';
 
-import { IDataObject, INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
+import {
+	IDataObject,
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
+	JsonObject,
+	NodeApiError,
+} from 'n8n-workflow';
 
 import { OptionsWithUri } from 'request';
 
@@ -283,7 +290,18 @@ export class RdStation implements INodeType {
 						uri: `https://api.rd.services/platform/events`,
 						json: true,
 					};
-					responseData = await this.helpers.requestOAuth2.call(this, 'rdStationOAuth2Api', options);
+					try {
+						responseData = await this.helpers.requestOAuth2.call(
+							this,
+							'rdStationOAuth2Api',
+							options,
+							{
+								tokenType: 'Bearer',
+							},
+						);
+					} catch (error) {
+						throw new NodeApiError(this.getNode(), error as JsonObject);
+					}
 					returnData.push(responseData);
 				}
 			}
