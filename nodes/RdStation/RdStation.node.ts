@@ -9,6 +9,7 @@ const eventTypeMap: any = {
 	opportunity: 'OPPORTUNITY',
 	sale: 'SALE',
 	lost: 'OPPORTUNITY_LOST',
+	call_finished: 'CALL_FINISHED',
 };
 
 export class RdStation implements INodeType {
@@ -40,8 +41,16 @@ export class RdStation implements INodeType {
 				type: 'options',
 				options: [
 					{
+						name: 'Call Finished',
+						value: 'call_finished',
+					},
+					{
 						name: 'Conversion',
 						value: 'conversion',
+					},
+					{
+						name: 'Lost',
+						value: 'lost',
 					},
 					{
 						name: 'Opportunity',
@@ -50,10 +59,6 @@ export class RdStation implements INodeType {
 					{
 						name: 'Sale',
 						value: 'sale',
-					},
-					{
-						name: 'Lost',
-						value: 'lost',
 					},
 				],
 				default: 'conversion',
@@ -67,7 +72,7 @@ export class RdStation implements INodeType {
 				type: 'options',
 				displayOptions: {
 					show: {
-						resource: ['conversion', 'opportunity', 'sale', 'lost'],
+						resource: ['conversion', 'opportunity', 'sale', 'lost', 'call_finished'],
 					},
 				},
 				options: [
@@ -104,7 +109,7 @@ export class RdStation implements INodeType {
 				displayOptions: {
 					show: {
 						operation: ['new'],
-						resource: ['conversion', 'opportunity', 'sale', 'lost'],
+						resource: ['conversion', 'opportunity', 'sale', 'lost', 'call_finished'],
 					},
 				},
 				default: '',

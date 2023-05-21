@@ -59,10 +59,6 @@ n8n v0.187+.
 - [RD Station Marketing API Key Authentication](https://developers.rdstation.com/reference/autenticacao-api-key)
 - [RD Station Marketing API Key Conversion](https://developers.rdstation.com/reference/conversao)
 
-## Version history
-
-0.2.0
-
 ## License
 
 MIT License
