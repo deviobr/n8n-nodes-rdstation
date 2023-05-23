@@ -168,7 +168,7 @@ export class RdStation implements INodeType {
 				default: {},
 				displayOptions: {
 					show: {
-						resource: ['conversion'],
+						resource: ['conversion', 'call_finished'],
 						operation: ['new'],
 					},
 				},
