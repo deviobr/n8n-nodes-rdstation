@@ -1,6 +1,6 @@
 {
 	"name": "@deviobr/n8n-nodes-rdstation",
-	"version": "0.2.3",
+	"version": "0.2.4",
 	"description": "n8n node to create a new conversion in RD Station Marketing",
 	"keywords": [
 		"n8n-community-node-package"
