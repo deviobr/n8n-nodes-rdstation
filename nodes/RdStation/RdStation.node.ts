@@ -300,7 +300,7 @@ export class RdStation implements INodeType {
 									payload.reason = reason;
 								}
 							}
-						} else if ('call_finished' === resource) {
+						} else if (resource === 'call_finished') {
 							// Get call type input
 							const callType = this.getNodeParameter('call_type', i) as string;
 							payload.call_type = callType;
@@ -310,7 +310,7 @@ export class RdStation implements INodeType {
 							payload.call_status = callStatus;
 						}
 
-						if (['conversion', 'call_finished']) {
+						if (['conversion', 'call_finished'].includes(resource)) {
 							// Get additional fields input
 							const { customFields } = this.getNodeParameter('additionalFields', i) as {
 								customFields: {
