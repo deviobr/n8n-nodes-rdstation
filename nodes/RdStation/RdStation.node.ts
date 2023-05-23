@@ -161,6 +161,51 @@ export class RdStation implements INodeType {
 				description: 'Reason for why the Contact was marked as lost',
 			},
 			{
+				displayName: 'Call From Number',
+				name: 'call_from_number',
+				type: 'string',
+				required: true,
+				displayOptions: {
+					show: {
+						operation: ['new'],
+						resource: ['call_finished'],
+					},
+				},
+				default: '',
+				placeholder: 'Call From Number',
+				description: 'Number of Call Tracking',
+			},
+			{
+				displayName: 'Call Type',
+				name: 'call_type',
+				type: 'options',
+				displayOptions: {
+					show: {
+						operation: ['new'],
+						resource: ['call_finished'],
+					},
+				},
+				options: [
+					{
+						name: 'Inbound',
+						value: 'Inbound',
+					},
+					{
+						name: 'Outbound',
+						value: 'Outbound',
+					},
+				],
+				default: 'Outbound',
+				placeholder: 'Call Status',
+				description: 'Call type. Inbound or Outbound.',
+			},
+			{
+				displayName: 'Call Status',
+				name: 'call_status',
+				type: 'hidden',
+				default: 'in_progress',
+			},
+			{
 				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
@@ -225,7 +270,7 @@ export class RdStation implements INodeType {
 		// For each item, make an API call to create a contact
 		for (let i = 0; i < items.length; i++) {
 			try {
-				if (['conversion', 'opportunity', 'sale', 'lost'].includes(resource)) {
+				if (['conversion', 'opportunity', 'sale', 'lost', 'call_finished'].includes(resource)) {
 					if (operation === 'new') {
 						// Get email input
 						const email = this.getNodeParameter('email', i) as string;
@@ -237,7 +282,35 @@ export class RdStation implements INodeType {
 							// Get identifier input
 							const identifier = this.getNodeParameter('identifier', i) as string;
 							payload.conversion_identifier = identifier;
+						} else if (['opportunity', 'sale', 'lost'].includes(resource)) {
+							// Get funnel name input
+							const funnelName = this.getNodeParameter('funnel_name', i) as string;
+							payload.funnel_name = funnelName;
 
+							if (resource === 'sale') {
+								// Get value input
+								const value = this.getNodeParameter('value', i) as number;
+								if (value) {
+									payload.value = value;
+								}
+							} else if (resource === 'lost') {
+								// Get reason input
+								const reason = this.getNodeParameter('reason', i) as string;
+								if (reason) {
+									payload.reason = reason;
+								}
+							}
+						} else if ('call_finished' === resource) {
+							// Get call type input
+							const callType = this.getNodeParameter('call_type', i) as string;
+							payload.call_type = callType;
+
+							// Get call status input
+							const callStatus = this.getNodeParameter('call_status', i) as string;
+							payload.call_status = callStatus;
+						}
+
+						if (['conversion', 'call_finished']) {
 							// Get additional fields input
 							const { customFields } = this.getNodeParameter('additionalFields', i) as {
 								customFields: {
@@ -256,24 +329,6 @@ export class RdStation implements INodeType {
 									{},
 								);
 								Object.assign(payload, data);
-							}
-						} else if (['opportunity', 'sale', 'lost'].includes(resource)) {
-							// Get funnel name input
-							const funnelName = this.getNodeParameter('funnel_name', i) as string;
-							payload.funnel_name = funnelName;
-
-							if (resource === 'sale') {
-								// Get value input
-								const value = this.getNodeParameter('value', i) as number;
-								if (value) {
-									payload.value = value;
-								}
-							} else if (resource === 'lost') {
-								// Get reason input
-								const reason = this.getNodeParameter('reason', i) as string;
-								if (reason) {
-									payload.reason = reason;
-								}
 							}
 						}
 
