@@ -301,6 +301,10 @@ export class RdStation implements INodeType {
 								}
 							}
 						} else if (resource === 'call_finished') {
+							// Get call from number input
+							const callFromNumber = this.getNodeParameter('call_from_number', i) as string;
+							payload.call_from_number = callFromNumber;
+
 							// Get call type input
 							const callType = this.getNodeParameter('call_type', i) as string;
 							payload.call_type = callType;
