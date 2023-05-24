@@ -290,8 +290,8 @@ export class RdStation implements INodeType {
 							if (resource === 'sale') {
 								// Get value input
 								const value = this.getNodeParameter('value', i) as number;
-								if (value) {
-									payload.value = value;
+								if (!isNaN(value)) {
+									payload.value = +value;
 								}
 							} else if (resource === 'lost') {
 								// Get reason input
