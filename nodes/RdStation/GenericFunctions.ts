@@ -40,6 +40,7 @@ export async function rdStationApiRequest(
 
 		const oAuth2Options: IOAuth2Options = {
 			tokenType: 'Bearer',
+			includeCredentialsOnRefreshOnBody: true,
 		};
 
 		//@ts-ignore
