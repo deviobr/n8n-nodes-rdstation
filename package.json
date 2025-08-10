@@ -1,5 +1,5 @@
 {
-	"name": "@deviobr/n8n-nodes-rdstation",
+	"name": "@rgrowth/n8n-nodes-rdstation",
 	"version": "0.2.8",
 	"description": "n8n node to create a new conversion in RD Station Marketing",
 	"keywords": [
