@@ -106,6 +106,48 @@ export class RdStation implements INodeType {
 				description: 'Conversion Identifier',
 			},
 			{
+			  displayName: 'Telefone (Celular)',
+			  name: 'mobile_phone',
+			  type: 'string',
+			  default: '',
+			  placeholder: '+55 48 99999-9999',
+			  description: 'Número de celular do lead',
+			  displayOptions: {
+				show: {
+				  resource: ['conversion'],
+				  operation: ['new'],
+				},
+			  },
+			},
+			{
+			  displayName: 'Nome',
+			  name: 'name',
+			  type: 'string',
+			  default: '',
+			  placeholder: 'Fulano de Tal',
+			  description: 'Nome completo do lead',
+			  displayOptions: {
+				show: {
+				  resource: ['conversion'],
+				  operation: ['new'],
+				},
+			  },
+			},
+			{
+			  displayName: 'Cargo',
+			  name: 'job_title',
+			  type: 'string',
+			  default: '',
+			  placeholder: 'Desenvolvedor',
+			  description: 'Cargo ou posição do lead',
+			  displayOptions: {
+				show: {
+				  resource: ['conversion'],
+				  operation: ['new'],
+				},
+			  },
+			},
+			{
 				displayName: 'Email',
 				name: 'email',
 				type: 'string',
@@ -286,6 +328,20 @@ export class RdStation implements INodeType {
 							// Get identifier input
 							const identifier = this.getNodeParameter('identifier', i) as string;
 							payload.conversion_identifier = identifier;
+							const mobilePhone = this.getNodeParameter('mobile_phone', i) as string;
+							if (mobilePhone) {
+							  payload.mobile_phone = mobilePhone;
+							}
+
+							const fullName = this.getNodeParameter('name', i) as string;
+							if (fullName) {
+							  payload.name = fullName;
+							}
+
+							const jobTitle = this.getNodeParameter('job_title', i) as string;
+							if (jobTitle) {
+							  payload.job_title = jobTitle;
+							}
 						} else if (['opportunity', 'sale', 'lost'].includes(resource)) {
 							// Get funnel name input
 							const funnelName = this.getNodeParameter('funnel_name', i) as string;
