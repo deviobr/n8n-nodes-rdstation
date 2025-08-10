@@ -25,7 +25,7 @@ For users on n8n v0.187+, your instance owner can install this node from [Commun
 
 1. Go to **Settings > Community Nodes**.
 2. Select **Install**.
-3. Enter `@deviobr/n8n-nodes-rdstation` in **Enter npm package name**.
+3. Enter `@rgrowth/n8n-nodes-rdstation` in **Enter npm package name**.
 4. Agree to the [risks](https://docs.n8n.io/integrations/community-nodes/risks/) of using community nodes: select **I understand the risks of installing unverified code from a public source**.
 5. Select **Install**.
 
