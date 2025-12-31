@@ -1,9 +1,10 @@
-import { ICredentialType, INodeProperties } from 'n8n-workflow';
+import type { Icon, ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class RdStationOAuth2Api implements ICredentialType {
 	name = 'rdStationOAuth2Api';
 	extends = ['oAuth2Api'];
 	displayName = 'RD Station OAuth2 API';
+	icon: Icon = { light: 'file:../icons/rdStation.svg', dark: 'file:../icons/rdStation.dark.svg' };
 	documentationUrl = 'https://developers.rdstation.com/reference/introducao-rdsm';
 	properties: INodeProperties[] = [
 		{

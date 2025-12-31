@@ -1,14 +1,15 @@
-import {
+import type {
 	IDataObject,
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription
 } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
-import { rdStationApiRequest } from './GenericFunctions';
+import { rdStationApiRequest } from './shared/transport';
 
-const eventTypeMap: any = {
+const eventTypeMap: {[key: string]: string} = {
 	conversion: 'CONVERSION',
 	opportunity: 'OPPORTUNITY',
 	sale: 'SALE',
@@ -21,7 +22,7 @@ export class RdStation implements INodeType {
 		// Basic node details will go here
 		displayName: 'RD Station',
 		name: 'rdStation',
-		icon: 'file:rdStation.svg',
+		icon: { light: 'file:../../icons/rdStation.svg', dark: 'file:../../icons/rdStation.dark.svg' },
 		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -29,14 +30,22 @@ export class RdStation implements INodeType {
 		defaults: {
 			name: 'RD Station',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		usableAsTool: true,
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'rdStationOAuth2Api',
 				required: true,
 			},
 		],
+		requestDefaults: {
+			baseURL: 'https://api.rd.services/platform',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+			},
+		},
 		properties: [
 			// Resources and operations will go here
 			{
@@ -404,25 +413,29 @@ export class RdStation implements INodeType {
 						responseData = await rdStationApiRequest.call(this, 'POST', '/events', body);
 					}
 				}
+				const executionData = this.helpers.constructExecutionMetaData(
+					this.helpers.returnJsonArray(responseData as IDataObject),
+					{ itemData: { item: i } },
+				);
+				returnData.push(...executionData);
 			} catch (error) {
 				if (this.continueOnFail()) {
-					const executionErrorData = {
-						json: {} as IDataObject,
-						error: error.message,
+					returnData.push({ json: this.getInputData(i)[0].json, error, pairedItem: i });
+				} else {
+					// Adding `itemIndex` allows other workflows to handle this error
+					if (error.context) {
+						// If the error thrown already contains the context property,
+						// only append the itemIndex
+						error.context.itemIndex = i;
+						throw error;
+					}
+					throw new NodeOperationError(this.getNode(), error, {
 						itemIndex: i,
-					};
-					returnData.push(executionErrorData as INodeExecutionData);
-					continue;
+					});
 				}
-				throw error;
 			}
-			const executionData = this.helpers.constructExecutionMetaData(
-				this.helpers.returnJsonArray(responseData as IDataObject),
-				{ itemData: { item: i } },
-			);
-			returnData.push(...executionData);
 		}
 
-		return this.prepareOutputData(returnData);
+		return [returnData];
 	}
 }
